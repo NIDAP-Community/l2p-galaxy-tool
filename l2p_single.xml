@@ -1,0 +1,101 @@
+<tool id="l2p_single" name="L2P Single Comparison" version="1.1.0">
+    <description>L2P pathway over-representation with plots</description>
+
+    <requirements>
+        <container type="docker">ghcr.io/NIDAP-Community/l2p-galaxy-tool:latest</container>
+    </requirements>
+
+    <command detect_errors="exit_code"><![CDATA[
+Rscript /opt/l2p_single/run_L2P_Single.R
+    '$deg'
+    '$out_pathways'
+    '$bar_up'
+    '$bar_down'
+    '$bubble_up'
+    '$bubble_down'
+    '$gene_name_column'
+    '$species'
+    '$select_by_rank'
+    '$rank_column'
+    '$significance_column'
+    '$fold_change_column'
+    '$significance_threshold'
+    '$fold_change_threshold'
+    ]]></command>
+
+    <inputs>
+        <param name="deg" type="data" format="tabular"
+               label="DEG table"
+               help="Differential expression results with one row per gene." />
+
+        <param name="gene_name_column" type="text" value="symbol"
+               label="Gene name column"
+               help="Column in the DEG table containing gene identifiers." />
+
+        <param name="species" type="select" label="Species">
+            <option value="Human" selected="true">Human</option>
+            <option value="Mouse">Mouse</option>
+        </param>
+
+        <param name="select_by_rank" type="boolean" checked="true"
+               label="Select genes by rank instead of thresholds?" />
+
+        <param name="rank_column" type="text" value="groupA_vs_groupB_tstat"
+               label="Ranking column (e.g. t-statistic)"
+               help="Used when 'Select genes by rank' is enabled." />
+
+        <param name="significance_column" type="text" value="groupA_vs_groupB_pval"
+               label="Significance column (p-value)"
+               help="Used when selecting by thresholds or when rank selection switches to thresholds." />
+
+        <param name="fold_change_column" type="text" value="groupA_vs_groupB_FC"
+               label="Fold-change column (linear scale)"
+               help="Used when selecting by thresholds or when rank selection switches to thresholds." />
+
+        <param name="significance_threshold" type="float" value="0.05"
+               label="Significance threshold (p-value)" />
+
+        <param name="fold_change_threshold" type="float" value="1.2"
+               label="Fold-change threshold (linear FC)" />
+    </inputs>
+
+    <outputs>
+        <data name="out_pathways" format="csv"
+              label="L2P pathways" />
+
+        <data name="bar_up" format="png"
+              label="L2P bar plot (upregulated)" />
+
+        <data name="bar_down" format="png"
+              label="L2P bar plot (downregulated)" />
+
+        <data name="bubble_up" format="png"
+              label="L2P bubble plot (upregulated)" />
+
+        <data name="bubble_down" format="png"
+              label="L2P bubble plot (downregulated)" />
+    </outputs>
+
+    <help><![CDATA[
+Runs the CCBR/NIDAP-style `L2P_Single()` analysis.
+
+**Inputs**
+
+- A differential expression table (tabular) with one row per gene.
+- Column names for:
+  - gene identifiers
+  - ranking statistic (e.g. t-stat)
+  - p-values
+  - fold-change (linear scale)
+- Selection mode and thresholds.
+
+**Outputs**
+
+- A CSV table of enriched pathways (up and down combined).
+- PNG bar plots for up- and down-regulated pathways.
+- PNG bubble plots for up- and down-regulated pathways.
+
+If no pathways are significant in a direction, a placeholder PNG is produced
+with a "no results" message.
+    ]]></help>
+</tool>

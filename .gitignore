@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Docker
+*.log
+
+# R
+.Rhistory
+.RData
+.Rproj.user
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test outputs
+test_data/*.png
+!test_data/deg_results.csv
+
+# Temporary files
+*.tmp
+tmp/
+test_data/deg_results.csv
