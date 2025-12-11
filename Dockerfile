@@ -24,16 +24,42 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Install R packages
+# Install R packages in dependency order
+# First install base dependencies
 RUN R -q -e " \
   options( \
     repos = c(CRAN = 'http://cran.r-project.org'), \
     download.file.method = 'wget' \
   ); \
-  pkgs <- c('dplyr','magrittr','ggplot2','stringr','RCurl'); \
+  install.packages('magrittr', dependencies = TRUE); \
+  "
+
+# Install tidyverse core packages
+RUN R -q -e " \
+  options( \
+    repos = c(CRAN = 'http://cran.r-project.org'), \
+    download.file.method = 'wget' \
+  ); \
+  install.packages('dplyr', dependencies = TRUE); \
+  "
+
+# Install remaining packages
+RUN R -q -e " \
+  options( \
+    repos = c(CRAN = 'http://cran.r-project.org'), \
+    download.file.method = 'wget' \
+  ); \
+  pkgs <- c('ggplot2', 'stringr', 'RCurl'); \
   install.packages(pkgs, dependencies = TRUE); \
-  missing <- setdiff(pkgs, rownames(installed.packages())); \
-  if (length(missing) > 0) stop('Missing packages after install: ', paste(missing, collapse = ', ')); \
+  "
+
+# Verify all packages installed successfully
+RUN R -q -e " \
+  required <- c('dplyr', 'magrittr', 'ggplot2', 'stringr', 'RCurl'); \
+  installed <- rownames(installed.packages()); \
+  missing <- setdiff(required, installed); \
+  if (length(missing) > 0) stop('Missing packages: ', paste(missing, collapse = ', ')); \
+  cat('All required packages installed successfully\n'); \
   "
 
 # Set working directory
