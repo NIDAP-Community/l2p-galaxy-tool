@@ -22,35 +22,60 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg-dev \
     ca-certificates \
     wget \
+    build-essential \
+    gfortran \
     && rm -rf /var/lib/apt/lists/*
 
 # Install R packages in dependency order
-# First install base dependencies
+# Install core dependencies first with error checking
 RUN R -q -e " \
   options( \
     repos = c(CRAN = 'http://cran.r-project.org'), \
-    download.file.method = 'wget' \
+    download.file.method = 'wget', \
+    Ncpus = 2 \
   ); \
+  cat('Installing curl package...\n'); \
+  install.packages('curl', dependencies = TRUE); \
+  if (!'curl' %in% rownames(installed.packages())) { \
+    cat('curl failed to install, checking system libraries...\n'); \
+    system('pkg-config --libs libcurl'); \
+    stop('curl package installation failed'); \
+  } \
+  cat('Installing magrittr...\n'); \
   install.packages('magrittr', dependencies = TRUE); \
   "
 
-# Install tidyverse core packages
+# Install RCurl which depends on curl  
 RUN R -q -e " \
   options( \
     repos = c(CRAN = 'http://cran.r-project.org'), \
-    download.file.method = 'wget' \
+    download.file.method = 'wget', \
+    Ncpus = 2 \
   ); \
-  install.packages('dplyr', dependencies = TRUE); \
+  cat('Installing RCurl...\n'); \
+  install.packages('RCurl', dependencies = TRUE); \
   "
 
-# Install remaining packages
+# Install tidyverse packages
 RUN R -q -e " \
   options( \
     repos = c(CRAN = 'http://cran.r-project.org'), \
-    download.file.method = 'wget' \
+    download.file.method = 'wget', \
+    Ncpus = 2 \
   ); \
-  pkgs <- c('ggplot2', 'stringr', 'RCurl'); \
-  install.packages(pkgs, dependencies = TRUE); \
+  cat('Installing dplyr and stringr...\n'); \
+  install.packages(c('dplyr', 'stringr'), dependencies = TRUE); \
+  "
+
+# Install ggplot2
+RUN R -q -e " \
+  options( \
+    repos = c(CRAN = 'http://cran.r-project.org'), \
+    download.file.method = 'wget', \
+    Ncpus = 2 \
+  ); \
+  cat('Installing ggplot2...\n'); \
+  install.packages('ggplot2', dependencies = TRUE); \
   "
 
 # Verify all packages installed successfully
@@ -59,7 +84,8 @@ RUN R -q -e " \
   installed <- rownames(installed.packages()); \
   missing <- setdiff(required, installed); \
   if (length(missing) > 0) stop('Missing packages: ', paste(missing, collapse = ', ')); \
-  cat('All required packages installed successfully\n'); \
+  cat('All required packages installed successfully:\n'); \
+  cat(paste(required, collapse = ', '), '\n'); \
   "
 
 # Set working directory
