@@ -27,66 +27,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install R packages in dependency order
-# Install core dependencies first with error checking
-RUN R -q -e " \
-  options( \
-    repos = c(CRAN = 'http://cran.r-project.org'), \
-    download.file.method = 'wget', \
-    Ncpus = 2 \
-  ); \
-  cat('Installing curl package...\n'); \
-  install.packages('curl', dependencies = TRUE); \
-  if (!'curl' %in% rownames(installed.packages())) { \
-    cat('curl failed to install, checking system libraries...\n'); \
-    system('pkg-config --libs libcurl'); \
-    stop('curl package installation failed'); \
-  } \
-  cat('Installing magrittr...\n'); \
-  install.packages('magrittr', dependencies = TRUE); \
-  "
+# Install core dependencies first
+RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2); cat('Installing curl and magrittr...\n'); install.packages(c('curl', 'magrittr'), dependencies = TRUE)"
 
 # Install RCurl which depends on curl  
-RUN R -q -e " \
-  options( \
-    repos = c(CRAN = 'http://cran.r-project.org'), \
-    download.file.method = 'wget', \
-    Ncpus = 2 \
-  ); \
-  cat('Installing RCurl...\n'); \
-  install.packages('RCurl', dependencies = TRUE); \
-  "
+RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2); cat('Installing RCurl...\n'); install.packages('RCurl', dependencies = TRUE)"
 
 # Install tidyverse packages
-RUN R -q -e " \
-  options( \
-    repos = c(CRAN = 'http://cran.r-project.org'), \
-    download.file.method = 'wget', \
-    Ncpus = 2 \
-  ); \
-  cat('Installing dplyr and stringr...\n'); \
-  install.packages(c('dplyr', 'stringr'), dependencies = TRUE); \
-  "
+RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2); cat('Installing dplyr and stringr...\n'); install.packages(c('dplyr', 'stringr'), dependencies = TRUE)"
 
 # Install ggplot2
-RUN R -q -e " \
-  options( \
-    repos = c(CRAN = 'http://cran.r-project.org'), \
-    download.file.method = 'wget', \
-    Ncpus = 2 \
-  ); \
-  cat('Installing ggplot2...\n'); \
-  install.packages('ggplot2', dependencies = TRUE); \
-  "
+RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2); cat('Installing ggplot2...\n'); install.packages('ggplot2', dependencies = TRUE)"
 
 # Verify all packages installed successfully
-RUN R -q -e " \
-  required <- c('dplyr', 'magrittr', 'ggplot2', 'stringr', 'RCurl'); \
-  installed <- rownames(installed.packages()); \
-  missing <- setdiff(required, installed); \
-  if (length(missing) > 0) stop('Missing packages: ', paste(missing, collapse = ', ')); \
-  cat('All required packages installed successfully:\n'); \
-  cat(paste(required, collapse = ', '), '\n'); \
-  "
+RUN R -q -e "required <- c('dplyr', 'magrittr', 'ggplot2', 'stringr', 'RCurl'); installed <- rownames(installed.packages()); missing <- setdiff(required, installed); if (length(missing) > 0) stop('Missing packages: ', paste(missing, collapse = ', ')); cat('All required packages installed successfully:\n'); cat(paste(required, collapse = ', '), '\n')"
 
 # Set working directory
 WORKDIR /opt/l2p_single
