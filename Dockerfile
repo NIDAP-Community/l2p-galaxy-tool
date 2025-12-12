@@ -26,18 +26,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gfortran \
     && rm -rf /var/lib/apt/lists/*
 
-# Install R packages in dependency order
+# Install R packages in dependency order with verification
 # Install core dependencies first
-RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2); cat('Installing curl and magrittr...\n'); install.packages(c('curl', 'magrittr'), dependencies = TRUE)"
+RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages(c('curl', 'magrittr'), dependencies = TRUE); if (!all(c('curl', 'magrittr') %in% rownames(installed.packages()))) q(status = 1)"
 
 # Install RCurl which depends on curl  
-RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2); cat('Installing RCurl...\n'); install.packages('RCurl', dependencies = TRUE)"
+RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('RCurl', dependencies = TRUE); if (!'RCurl' %in% rownames(installed.packages())) q(status = 1)"
 
 # Install tidyverse packages
-RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2); cat('Installing dplyr and stringr...\n'); install.packages(c('dplyr', 'stringr'), dependencies = TRUE)"
+RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages(c('dplyr', 'stringr'), dependencies = TRUE); if (!all(c('dplyr', 'stringr') %in% rownames(installed.packages()))) q(status = 1)"
 
 # Install ggplot2
-RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2); cat('Installing ggplot2...\n'); install.packages('ggplot2', dependencies = TRUE)"
+RUN R -q -e "options(repos = c(CRAN = 'http://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('ggplot2', dependencies = TRUE); if (!'ggplot2' %in% rownames(installed.packages())) q(status = 1)"
 
 # Verify all packages installed successfully
 RUN R -q -e "required <- c('dplyr', 'magrittr', 'ggplot2', 'stringr', 'RCurl'); installed <- rownames(installed.packages()); missing <- setdiff(required, installed); if (length(missing) > 0) stop('Missing packages: ', paste(missing, collapse = ', ')); cat('All required packages installed successfully:\n'); cat(paste(required, collapse = ', '), '\n')"
