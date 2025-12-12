@@ -1,10 +1,10 @@
-# L2P Single Comparison - Galaxy Tool Container
+# List to Pathways (L2P) Single Comparison - Galaxy Tool Container
 # Based on rocker/r-ver with tidyverse dependencies
 
 FROM rocker/r-ver:4.1.3
 
 LABEL org.opencontainers.image.source="https://github.com/NIDAP-Community/l2p-galaxy-tool"
-LABEL org.opencontainers.image.description="L2P pathway enrichment analysis tool for Galaxy"
+LABEL org.opencontainers.image.description="List to Pathways (L2P) enrichment analysis tool for Galaxy"
 LABEL org.opencontainers.image.licenses="MIT"
 
 # Set environment

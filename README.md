@@ -1,6 +1,6 @@
 # L2P Galaxy Tool
 
-A Galaxy tool for performing L2P (Leading edge to Pathway) pathway enrichment analysis on differential expression data. This tool generates both bar plots and bubble plots for upregulated and downregulated gene sets.
+A Galaxy tool for performing List to Pathways (L2P) enrichment analysis on differential expression data. This tool generates both bar plots and bubble plots for upregulated and downregulated gene sets.
 
 ## Features
 
@@ -10,6 +10,12 @@ A Galaxy tool for performing L2P (Leading edge to Pathway) pathway enrichment an
 - **Flexible gene selection**: By rank (e.g., t-statistic) or by thresholds (p-value and fold-change)
 - **Publication-ready plots** with proper formatting (50pt top margins, wrapped labels, optimized dimensions)
 - **Container-based deployment** via GitHub Container Registry (ghcr.io)
+
+## Example Outputs
+
+![Example bubble plot showing downregulated pathways](docs/images/L2P_Down_Bubble.png)
+
+![Example bar plot showing downregulated pathways](docs/images/L2P_Down_Bar.png)
 
 ## Container Image
 
