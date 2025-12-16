@@ -27,11 +27,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install R packages in dependency order with verification
-# Install remotes to enable version pinning
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('remotes', dependencies = TRUE); if (!'remotes' %in% rownames(installed.packages())) q(status = 1)"
+# Install curl (pinned to version compatible with system libcurl)
+RUN wget -q https://cran.r-project.org/src/contrib/Archive/curl/curl_4.3.2.tar.gz \
+  && R CMD INSTALL curl_4.3.2.tar.gz \
+  && rm curl_4.3.2.tar.gz
 
-# Install curl (pinned to version compatible with system libcurl) and magrittr
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); remotes::install_version('curl', version = '4.3.2', dependencies = TRUE, upgrade = 'never'); install.packages('magrittr', dependencies = TRUE); if (!all(c('curl', 'magrittr') %in% rownames(installed.packages()))) q(status = 1)"
+RUN R -q -e "if (!'curl' %in% rownames(installed.packages())) q(status = 1)"
+
+# Install magrittr after curl is available
+RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('magrittr', dependencies = TRUE); if (!'magrittr' %in% rownames(installed.packages())) q(status = 1)"
 
 # Install RCurl which depends on curl  
 RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('RCurl', dependencies = TRUE); if (!'RCurl' %in% rownames(installed.packages())) q(status = 1)"
