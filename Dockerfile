@@ -1,7 +1,7 @@
 # List to Pathways (L2P) Single Comparison - Galaxy Tool Container
-# Based on rocker/r-ver with tidyverse dependencies
+# Use rocker/tidyverse which has pre-compiled packages for multiple architectures
 
-FROM rocker/r-ver:4.1.3
+FROM rocker/tidyverse:4.1.3
 
 LABEL org.opencontainers.image.source="https://github.com/NIDAP-Community/l2p-galaxy-tool"
 LABEL org.opencontainers.image.description="List to Pathways (L2P) enrichment analysis tool for Galaxy"
@@ -12,23 +12,11 @@ ENV LANG=en_US.UTF-8
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
-    libfontconfig1-dev \
-    libfreetype6-dev \
-    libpng-dev \
-    libtiff5-dev \
-    libjpeg-dev \
-  ca-certificates \
-  wget \
-  build-essential \
-  gfortran \
-  r-cran-curl \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Install R packages - use current CRAN since r-cran-curl provides compatible curl
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), Ncpus = 2); install.packages(c('magrittr', 'RCurl', 'dplyr', 'stringr', 'ggplot2'))"
+# Install R packages - tidyverse already included in base, just need RCurl
+RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org')); install.packages('RCurl')"
 
 # Verify all packages installed successfully
 RUN R -q -e "required <- c('dplyr', 'magrittr', 'ggplot2', 'stringr', 'RCurl'); installed <- rownames(installed.packages()); missing <- setdiff(required, installed); if (length(missing) > 0) stop('Missing packages: ', paste(missing, collapse = ', ')); cat('All required packages installed successfully:\n'); cat(paste(required, collapse = ', '), '\n')"
