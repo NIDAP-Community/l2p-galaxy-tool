@@ -27,18 +27,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   r-cran-curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install R packages in dependency order with verification
-# Use CRAN snapshot from 2020-09-01 when curl 4.3.2 was current to avoid CURLINFO_EFFECTIVE_METHOD errors
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.microsoft.com/snapshot/2020-09-01/'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('magrittr', dependencies = TRUE); if (!'magrittr' %in% rownames(installed.packages())) q(status = 1)"
-
-# Install RCurl which depends on curl  
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.microsoft.com/snapshot/2020-09-01/'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('RCurl', dependencies = TRUE); if (!'RCurl' %in% rownames(installed.packages())) q(status = 1)"
+# Install R packages - use current CRAN since r-cran-curl provides compatible curl
+RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), Ncpus = 2); install.packages(c('magrittr', 'RCurl'), dependencies = c('Depends', 'Imports'))"
 
 # Install tidyverse packages
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.microsoft.com/snapshot/2020-09-01/'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages(c('dplyr', 'stringr'), dependencies = TRUE); if (!all(c('dplyr', 'stringr') %in% rownames(installed.packages()))) q(status = 1)"
+RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), Ncpus = 2); install.packages(c('dplyr', 'stringr'), dependencies = c('Depends', 'Imports'))"
 
 # Install ggplot2
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.microsoft.com/snapshot/2020-09-01/'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('ggplot2', dependencies = TRUE); if (!'ggplot2' %in% rownames(installed.packages())) q(status = 1)"
+RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), Ncpus = 2); install.packages('ggplot2', dependencies = c('Depends', 'Imports'))"
 
 # Verify all packages installed successfully
 RUN R -q -e "required <- c('dplyr', 'magrittr', 'ggplot2', 'stringr', 'RCurl'); installed <- rownames(installed.packages()); missing <- setdiff(required, installed); if (length(missing) > 0) stop('Missing packages: ', paste(missing, collapse = ', ')); cat('All required packages installed successfully:\n'); cat(paste(required, collapse = ', '), '\n')"
