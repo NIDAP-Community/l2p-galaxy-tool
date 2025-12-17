@@ -28,13 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install R packages - use current CRAN since r-cran-curl provides compatible curl
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), Ncpus = 2); install.packages(c('magrittr', 'RCurl'), dependencies = c('Depends', 'Imports'))"
-
-# Install tidyverse packages
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), Ncpus = 2); install.packages(c('dplyr', 'stringr'), dependencies = c('Depends', 'Imports'))"
-
-# Install ggplot2
-RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), Ncpus = 2); install.packages('ggplot2', dependencies = c('Depends', 'Imports'))"
+RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), Ncpus = 2); install.packages(c('magrittr', 'RCurl', 'dplyr', 'stringr', 'ggplot2'))"
 
 # Verify all packages installed successfully
 RUN R -q -e "required <- c('dplyr', 'magrittr', 'ggplot2', 'stringr', 'RCurl'); installed <- rownames(installed.packages()); missing <- setdiff(required, installed); if (length(missing) > 0) stop('Missing packages: ', paste(missing, collapse = ', ')); cat('All required packages installed successfully:\n'); cat(paste(required, collapse = ', '), '\n')"
