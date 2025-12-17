@@ -20,18 +20,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libtiff5-dev \
     libjpeg-dev \
-    ca-certificates \
-    wget \
-    build-essential \
-    gfortran \
+  ca-certificates \
+  wget \
+  build-essential \
+  gfortran \
+  r-cran-curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install R packages in dependency order with verification
-# Install curl (pinned to version compatible with system libcurl)
-RUN wget -q https://cran.r-project.org/src/contrib/Archive/curl/curl_4.3.2.tar.gz \
-  && R -q -e "install.packages('curl_4.3.2.tar.gz', repos = NULL, type = 'source'); if (!'curl' %in% rownames(installed.packages())) q(status = 1)" \
-  && rm curl_4.3.2.tar.gz
-
 # Install magrittr after curl is available
 RUN R -q -e "options(repos = c(CRAN = 'https://cran.r-project.org'), download.file.method = 'wget', Ncpus = 2, warn = 2); install.packages('magrittr', dependencies = TRUE); if (!'magrittr' %in% rownames(installed.packages())) q(status = 1)"
 
